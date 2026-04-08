@@ -1,6 +1,13 @@
 console.log('🏥', window.HOSPITAL_NAME, 'Dashboard - Enhanced Version');
+console.log('Connecting to server...');
+console.log('Hospital ID:', window.HOSPITAL_ID);
 
-const socket = io();
+const socket = io({
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 5
+});
 
 const connectionStatus = document.getElementById('connection-status');
 const alertsContainer = document.getElementById('alerts-container');
@@ -14,24 +21,38 @@ let todayAlerts = 0;
 
 socket.on('connect', () => {
     console.log('✅ Connected to server');
+    console.log('Socket ID:', socket.id);
+    console.log('Registering as:', window.HOSPITAL_ID);
     socket.emit('register-hospital', window.HOSPITAL_ID);
     connectionStatus.textContent = 'Online';
     connectionStatus.style.color = '#4caf50';
 });
 
-socket.on('disconnect', () => {
-    console.log('❌ Disconnected');
+socket.on('connect_error', (error) => {
+    console.error('❌ Connection error:', error);
+    connectionStatus.textContent = 'Connection Error';
+    connectionStatus.style.color = '#d32f2f';
+});
+
+socket.on('disconnect', (reason) => {
+    console.log('❌ Disconnected:', reason);
     connectionStatus.textContent = 'Offline';
     connectionStatus.style.color = '#d32f2f';
 });
 
 socket.on('registration-confirmed', (data) => {
     console.log('✅ Registered:', data);
+    connectionStatus.textContent = 'Online';
+    connectionStatus.style.color = '#4caf50';
 });
 
 socket.on('emergency-notification', (data) => {
-    console.log('\n🚨 EMERGENCY ALERT!', data);
+    console.log('\n🚨 EMERGENCY ALERT!');
+    console.log('  Alert ID:', data.alertId);
+    console.log('  Location:', data.location);
+    console.log('  FSR Value:', data.fsrValue);
     
+    // Prevent duplicate alerts
     if (alerts.find(a => a.id === data.alertId)) {
         console.log('⚠️ Duplicate alert ignored');
         return;
@@ -42,7 +63,12 @@ socket.on('emergency-notification', (data) => {
     updateStats();
 });
 
+socket.on('emergency-cancelled', () => {
+    console.log('✅ Emergency cancelled');
+});
+
 function addAlert(data) {
+    // Validate location data
     const location = data.location && data.location.address ? data.location : {
         address: 'Location unavailable',
         latitude: 0,
@@ -63,6 +89,8 @@ function addAlert(data) {
     alerts.unshift(alert);
     totalAlerts++;
     todayAlerts++;
+    
+    console.log('✅ Alert added:', alert);
     
     renderAlerts();
 }
@@ -140,18 +168,21 @@ function acceptAlert(alertId) {
     const alert = alerts.find(a => a.id === alertId);
     if (alert) {
         alert.status = 'accepted';
+        console.log('✅ Alert accepted:', alertId);
         renderAlerts();
     }
 }
 
 function completeAlert(alertId) {
     alerts = alerts.filter(a => a.id !== alertId);
+    console.log('✓ Alert completed:', alertId);
     renderAlerts();
     updateStats();
 }
 
 function navigateToLocation(lat, lng) {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
 }
 
 function updateStats() {
@@ -182,8 +213,19 @@ function playAlarmSound() {
     gainNode.gain.value = 0.2;
     
     oscillator.start();
+    
     setTimeout(() => oscillator.stop(), 500);
+    setTimeout(() => {
+        const osc2 = audioContext.createOscillator();
+        osc2.connect(gainNode);
+        osc2.frequency.value = 1200;
+        osc2.start();
+        setTimeout(() => osc2.stop(), 500);
+    }, 600);
 }
 
+// Initialize
 updateStats();
 renderAlerts();
+
+console.log(window.HOSPITAL_NAME, 'dashboard ready');
