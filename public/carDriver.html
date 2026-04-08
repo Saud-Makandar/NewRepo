@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Driver - ESP32 Emergency System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-content">
+        <h1>🚗 Car Driver Dashboard</h1>
+        <div class="info-box">
+            <p>ESP32 FSR Sensor Monitoring</p>
+            <p>Status: <span id="connection-status">Connecting...</span></p>
+            <p>ESP32: <span id="esp32-status">Waiting...</span></p>
+        </div>
+        
+        <div class="timer-display">
+            <h3>System Status</h3>
+            <p id="status-text">Waiting for FSR sensor press...</p>
+        </div>
+    </div>
+
+    <div id="question-popup" class="popup-overlay">
+        <div class="popup-box">
+            <div class="popup-icon">⚠️</div>
+            <h2>FSR Sensor Triggered!</h2>
+            <p class="popup-question">Do you need emergency help?</p>
+            <p id="fsr-info" style="color: #666; margin: 10px 0;"></p>
+            
+            <div class="timer-box">
+                <p>Time remaining: <span id="countdown">60</span> seconds</p>
+            </div>
+            
+            <div class="button-container">
+                <button id="yes-button" class="btn btn-yes">YES - I NEED HELP</button>
+                <button id="no-button" class="btn btn-no">NO - I'M FINE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="emergency-confirmed" class="emergency-screen">
+        <div class="emergency-box">
+            <div class="emergency-icon">🚨</div>
+            <h2>HELP IS ON THE WAY!</h2>
+            <p id="hospital-info">Notifying hospital...</p>
+            
+            <div id="help-tracker" class="help-tracker"></div>
+            
+            <div id="first-aid-guide" class="first-aid-guide">
+                <h3>🩹 First Aid - While Help Arrives</h3>
+                <div class="aid-steps">
+                    <div class="aid-step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <strong>Stay Calm</strong>
+                            <p>Take deep breaths. Help is on the way.</p>
+                        </div>
+                    </div>
+                    <div class="aid-step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <strong>Check for Injuries</strong>
+                            <p>Assess yourself for bleeding or pain.</p>
+                        </div>
+                    </div>
+                    <div class="aid-step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <strong>Stop Bleeding</strong>
+                            <p>Apply pressure with clean cloth if bleeding.</p>
+                        </div>
+                    </div>
+                    <div class="aid-step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <strong>Don't Move</strong>
+                            <p>Stay still if you suspect spinal injury.</p>
+                        </div>
+                    </div>
+                    <div class="aid-step">
+                        <span class="step-number">5</span>
+                        <div class="step-content">
+                            <strong>Stay Visible</strong>
+                            <p>Turn on hazard lights. Stay in safe location.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="close-emergency" class="btn btn-close">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="carDriver.js"></script>
+</body>
+</html>
