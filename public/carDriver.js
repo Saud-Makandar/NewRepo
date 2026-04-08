@@ -1,5 +1,7 @@
 console.log('🚗 Car Driver System - ESP32 Version');
 
+// Connect to backend server
+// Auto-connects to same origin (works for both local and deployed)
 const socket = io();
 
 const connectionStatus = document.getElementById('connection-status');
@@ -47,7 +49,9 @@ socket.on('fsr-alert', (data) => {
     esp32Status.textContent = 'Alert Received!';
     esp32Status.style.color = '#d32f2f';
     
+    // Play alarm sound immediately
     playAlarmSound();
+    
     showEmergencyPopup(data);
 });
 
@@ -57,6 +61,7 @@ socket.on('help-status', (data) => {
 });
 
 function playAlarmSound() {
+    // Create alarm sound using Web Audio API
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -70,6 +75,7 @@ function playAlarmSound() {
     
     oscillator.start();
     
+    // Siren effect
     let increasing = true;
     const interval = setInterval(() => {
         if (increasing) {
@@ -126,6 +132,7 @@ function confirmEmergency(response) {
     
     const reason = response === 'yes' ? 'User confirmed emergency' : 'No response - timeout';
     
+    // Play alarm again when confirmed
     playAlarmSound();
     
     socket.emit('emergency-response', {
@@ -139,6 +146,7 @@ function confirmEmergency(response) {
     statusText.style.color = '#d32f2f';
     hospitalInfo.textContent = 'Selecting nearest hospital...';
     
+    // Show first aid guide
     showFirstAidGuide();
 }
 
@@ -154,6 +162,8 @@ function updateHelpTracker(data) {
     if (!trackerDiv) return;
     
     trackerDiv.style.display = 'block';
+    
+    // Play alarm when help status updates
     playAlarmSound();
     
     if (data.status === 'dispatched') {
@@ -242,6 +252,7 @@ document.addEventListener('keydown', (event) => {
         }
     }
     
+    // Press Escape to close emergency screen
     if (event.key === 'Escape' && emergencyConfirmed.classList.contains('show')) {
         emergencyConfirmed.classList.remove('show');
         statusText.textContent = 'System ready - Waiting for FSR sensor';
