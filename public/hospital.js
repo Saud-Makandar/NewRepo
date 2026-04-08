@@ -1,9 +1,8 @@
 console.log('🏥', window.HOSPITAL_NAME, 'System - ESP32 Version');
 
 // Connect to backend server
-// If running backend locally: use 'http://localhost:3000'
-// If accessing from other devices: use 'http://YOUR_IP:3000'
-const socket = io('http://localhost:3000');
+// Auto-connects to same origin (works for both local and deployed)
+const socket = io();
 
 const connectionStatus = document.getElementById('connection-status');
 const waitingScreen = document.getElementById('waiting-screen');
